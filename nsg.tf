@@ -24,17 +24,17 @@ resource "azurerm_subnet_network_security_group_association" "bas_nsg_associatio
 resource "azurerm_network_security_rule" "bas_nsg" {
   for_each = var.azure_bastion_nsg_list
 
-  name                        = each.key
-  priority                    = each.value.priority
-  direction                   = each.value.direction
-  access                      = each.value.access
-  protocol                    = each.value.protocol
-  source_port_range           = each.value.source_port
-  destination_port_range      = each.value.destination_port
-  source_address_prefix       = each.value.source_address_prefix
+  name                   = each.key
+  priority               = each.value.priority
+  direction              = each.value.direction
+  access                 = each.value.access
+  protocol               = each.value.protocol
+  source_port_range      = each.value.source_port
+  destination_port_range = each.value.destination_port
+  source_address_prefix  = each.value.source_address_prefix
 
   #tfsec:ignore:azure-network-no-public-egress
-  destination_address_prefix  = each.value.destination_address_prefix
+  destination_address_prefix = each.value.destination_address_prefix
 
   resource_group_name         = var.bas_nsg_rg_name
   network_security_group_name = azurerm_network_security_group.bas_nsg.name
