@@ -7,10 +7,6 @@ variable "bas_subnet_name" {
   default     = "AzureBastionSubnet"
   type        = string
   description = "The name of the Azure Bastion Subnet - note, this is a static value and should not be changed"
-  validation {
-    condition     = var.bas_subnet_name != "AzureBastionSubnet"
-    error_message = "Subnet Name is invalid."
-  }
 }
 
 variable "bas_subnet_iprange" {
