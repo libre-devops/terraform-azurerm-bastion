@@ -68,13 +68,14 @@ resource "azurerm_network_security_rule" "bas_nsg" {
   destination_port_range      = each.value.destination_port
   source_address_prefix       = each.value.source_address_prefix
 
-  #tfsec:ignore:azure-network-no-public-egress[destination_address_prefix="*"]
+  #tfsec:ignore:azure-network-no-public-egress
   destination_address_prefix  = each.value.destination_address_prefix
 
   resource_group_name         = var.bas_nsg_rg_name
   network_security_group_name = azurerm_network_security_group.bas_nsg.name
 }
 
+#tfsec:ignore:azure-network-no-public-egress
 variable "azure_bastion_nsg_list" {
   default = {
     "AllowHttpsInbound"                       = { priority = "120", direction = "Inbound", source_port = "*", destination_port = "443", access = "Allow", protocol = "Tcp", source_address_prefix = "Internet", destination_address_prefix = "*" },
