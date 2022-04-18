@@ -55,7 +55,7 @@ resource "azurerm_subnet_network_security_group_association" "bas_nsg_associatio
 
 }
 // Fix error which causes security errors to be flagged by TFSec, public egress is needed for Azure Bastion to function, its kind of the point :)
-#tfsec:ignore:azure-network-no-public-egress[destination_address_prefix=*]
+#tfsec:ignore:azure-network-no-public-egress[destination_address_prefix="*"]
 resource "azurerm_network_security_rule" "bas_nsg" {
   for_each = var.azure_bastion_nsg_list
 
