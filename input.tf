@@ -1,17 +1,3 @@
-variable "rg_name" {
-  description = "The name of the resource group, this module does not create a resource group, it is expecting the value of a resource group already exists"
-  type        = string
-  validation {
-    condition     = length(var.rg_name) > 1 && length(var.rg_name) <= 24
-    error_message = "Resource group name is not valid."
-  }
-}
-
-variable "location" {
-  description = "The location for this resource to be put in"
-  type        = string
-}
-
 variable "vnet_name" {
   type        = string
   description = "The name of the VNet the bastion is intended to join"
@@ -22,7 +8,7 @@ variable "bas_subnet_name" {
   type        = string
   description = "The name of the Azure Bastion Subnet - note, this is a static value and should not be changed"
   validation {
-    condition     = var.rg_name != "AzureBastionSubnet"
+    condition     = var.bas_subnet_name != "AzureBastionSubnet"
     error_message = "Subnet Name is invalid."
   }
 }
