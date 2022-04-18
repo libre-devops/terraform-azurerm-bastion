@@ -86,4 +86,5 @@ variable "azure_bastion_nsg_list" {
     "AllowAzureBastionCommunicationOutbound2" = { priority = "185", direction = "Outbound", source_port = "*", destination_port = "8080", access = "Allow", protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork" },
     "AllowGetSessionInformation"              = { priority = "190", direction = "Outbound", source_port = "*", destination_port = "80", access = "Allow", protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "*" },
   }
+  description = "The Standard list of NSG rules needed to make a bastion work"
 }
