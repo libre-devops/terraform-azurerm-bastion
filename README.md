@@ -42,7 +42,14 @@ No modules.
 | <a name="input_bas_pip_sku"></a> [bas\_pip\_sku](#input\_bas\_pip\_sku) | The SKU for the Bastion Public IP, default is Standard | `string` | `"Standard"` | no |
 | <a name="input_bas_subnet_iprange"></a> [bas\_subnet\_iprange](#input\_bas\_subnet\_iprange) | The IP Range for the Bastion Subnet - Note, Minimum is a /28 | `string` | n/a | yes |
 | <a name="input_bas_subnet_name"></a> [bas\_subnet\_name](#input\_bas\_subnet\_name) | The name of the Azure Bastion Subnet - note, this is a static value and should not be changed | `string` | `"AzureBastionSubnet"` | no |
+| <a name="input_copy_paste_enabled"></a> [copy\_paste\_enabled](#input\_copy\_paste\_enabled) | Whether copy paste is enabled, defaults to true | `bool` | `true` | no |
+| <a name="input_file_copy_enabled"></a> [file\_copy\_enabled](#input\_file\_copy\_enabled) | Whether file copy is enabled | `bool` | `null` | no |
+| <a name="input_ip_connect_enabled"></a> [ip\_connect\_enabled](#input\_ip\_connect\_enabled) | Whether the IP connect feature is enabled | `bool` | `null` | no |
+| <a name="input_scale_units"></a> [scale\_units](#input\_scale\_units) | The number of scale units, default is 2 | `number` | `2` | no |
+| <a name="input_shareable_link_enabled"></a> [shareable\_link\_enabled](#input\_shareable\_link\_enabled) | Whether the shareable link is enabled | `bool` | `null` | no |
+| <a name="input_sku"></a> [sku](#input\_sku) | The SKU of the bastion, default is Basic | `string` | `"Basic"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | The default tags to be assigned | `map(any)` | n/a | yes |
+| <a name="input_tunneling_enabled"></a> [tunneling\_enabled](#input\_tunneling\_enabled) | Whether the tunneling feature is enable | `bool` | `null` | no |
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | The name of the VNet the bastion is intended to join | `string` | n/a | yes |
 | <a name="input_vnet_rg_name"></a> [vnet\_rg\_name](#input\_vnet\_rg\_name) | The name of the resource group that the VNet can be found int | `string` | n/a | yes |
 
