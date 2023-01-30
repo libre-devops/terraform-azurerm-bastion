@@ -69,9 +69,51 @@ variable "bas_subnet_name" {
   description = "The name of the Azure Bastion Subnet - note, this is a static value and should not be changed"
 }
 
+variable "copy_paste_enabled" {
+  type        = bool
+  description = "Whether copy paste is enabled, defaults to true"
+  default     = true
+}
+
+variable "file_copy_enabled" {
+  type        = bool
+  description = "Whether file copy is enabled"
+  default     = null
+}
+
+variable "ip_connect_enabled" {
+  type        = bool
+  description = "Whether the IP connect feature is enabled"
+  default     = null
+}
+
+variable "scale_units" {
+  type        = number
+  description = "The number of scale units, default is 2"
+  default     = 2
+}
+
+variable "shareable_link_enabled" {
+  type        = bool
+  description = "Whether the shareable link is enabled"
+  default     = null
+}
+
+variable "sku" {
+  type        = string
+  description = "The SKU of the bastion, default is Basic"
+  default     = "Basic"
+}
+
 variable "tags" {
   description = "The default tags to be assigned"
   type        = map(any)
+}
+
+variable "tunneling_enabled" {
+  type        = bool
+  description = "Whether the tunneling feature is enable"
+  default     = null
 }
 
 variable "vnet_name" {
