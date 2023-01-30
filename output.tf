@@ -1,3 +1,8 @@
+output "bas_dns_name" {
+  value       = azurerm_bastion_host.bas_host.dns_name
+  description = "The DNS name of the Azure Bastion"
+}
+
 output "bas_hostname" {
   value       = azurerm_bastion_host.bas_host.name
   description = "The host name of the bastion"
