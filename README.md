@@ -82,7 +82,7 @@ resource "azurerm_bastion_host" "bastion_host" {
   virtual_network_id     = var.bastion_sku == "Developer" ? var.virtual_network_id : null
 
   dynamic "ip_configuration" {
-    for_each = var.bastion_sku != "Developer" && var.create_bastion_subnet || var.external_subnet_id != null ? [1] : []
+    for_each = var.bastion_sku != "Developer" && var.create_bastion_subnet != null || var.external_subnet_id != null ? [1] : []
     content {
       name                 = var.bastion_host_ipconfig_name != null ? var.bastion_host_ipconfig_name : null
       subnet_id            = var.create_bastion_subnet ? azurerm_subnet.bastion_subnet[0].id : var.external_subnet_id != null ? var.external_subnet_id : null

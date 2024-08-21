@@ -9,7 +9,7 @@ output "bastion_hostname" {
 }
 
 output "bastion_ip_configuration" {
-  value       = azurerm_bastion_host.bastion_host.ip_configuration
+  value       = var.bastion_sku != "Developer" ? azurerm_bastion_host.bastion_host.ip_configuration[0] : null
   description = "The bastion host ip_configuration block"
 }
 
@@ -24,7 +24,7 @@ output "bastion_nsg_name" {
 }
 
 output "bastion_subnet_id" {
-  value       = azurerm_bastion_host.bastion_host.ip_configuration[0].subnet_id
+  value       = var.bastion_sku != "Developer" ? azurerm_bastion_host.bastion_host.ip_configuration[0].subnet_id : null
   description = "The subnet ID associated with the bastion host's IP configuration"
 }
 
