@@ -79,6 +79,7 @@ resource "azurerm_bastion_host" "bastion_host" {
   scale_units            = var.bastion_sku == "Standard" ? var.scale_units : 2 # 2 is default for Basic sku
   shareable_link_enabled = var.bastion_sku == "Standard" ? var.shareable_link_enabled : null
   tunneling_enabled      = var.bastion_sku == "Standard" ? var.tunneling_enabled : null
+  virtual_network_id     = var.bastion_sku == "Developer" ? var.virtual_network_id : null
 
   dynamic "ip_configuration" {
     for_each = var.create_bastion_subnet || var.external_subnet_id != null ? [1] : []
@@ -150,6 +151,7 @@ No modules.
 | <a name="input_shareable_link_enabled"></a> [shareable\_link\_enabled](#input\_shareable\_link\_enabled) | Whether the shareable link is enabled | `bool` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | The default tags to be assigned | `map(string)` | n/a | yes |
 | <a name="input_tunneling_enabled"></a> [tunneling\_enabled](#input\_tunneling\_enabled) | Whether the tunneling feature is enable | `bool` | `null` | no |
+| <a name="input_virtual_network_id"></a> [virtual\_network\_id](#input\_virtual\_network\_id) | The ID of the virtual network that the bastion should be attached to when in Developer SKU | `string` | `null` | no |
 
 ## Outputs
 

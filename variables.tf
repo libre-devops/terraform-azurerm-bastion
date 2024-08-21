@@ -1,16 +1,49 @@
 variable "azure_bastion_nsg_list" {
   default = {
-    "AllowHttpsInbound"                       = { priority = "120", direction = "Inbound", source_port = "*", destination_port = "443", access = "Allow", protocol = "Tcp", source_address_prefix = "Internet", destination_address_prefix = "*" },
-    "AllowGatewayManagerInbound"              = { priority = "130", direction = "Inbound", source_port = "*", destination_port = "443", access = "Allow", protocol = "Tcp", source_address_prefix = "GatewayManager", destination_address_prefix = "*" },
-    "AllowAzureLoadBalancerInbound"           = { priority = "140", direction = "Inbound", source_port = "*", destination_port = "443", access = "Allow", protocol = "Tcp", source_address_prefix = "AzureLoadBalancer", destination_address_prefix = "*" },
-    "AllowBastionHostCommunication1"          = { priority = "150", direction = "Inbound", source_port = "*", destination_port = "5701", access = "Allow", protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork" },
-    "AllowBastionHostCommunication2"          = { priority = "155", direction = "Inbound", source_port = "*", destination_port = "80", access = "Allow", protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork" },
-    "AllowSSHRDPOutbound1"                    = { priority = "160", direction = "Outbound", source_port = "*", destination_port = "22", access = "Allow", protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "VirtualNetwork" },
-    "AllowSSHRDPOutbound2"                    = { priority = "165", direction = "Outbound", source_port = "*", destination_port = "3389", access = "Allow", protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "VirtualNetwork" },
-    "AllowAzureCloudOutbound2"                = { priority = "170", direction = "Outbound", source_port = "*", destination_port = "443", access = "Allow", protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "AzureCloud" },
-    "AllowAzureBastionCommunicationOutbound1" = { priority = "180", direction = "Outbound", source_port = "*", destination_port = "5701", access = "Allow", protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork" },
-    "AllowAzureBastionCommunicationOutbound2" = { priority = "185", direction = "Outbound", source_port = "*", destination_port = "8080", access = "Allow", protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork" },
-    "AllowGetSessionInformation"              = { priority = "190", direction = "Outbound", source_port = "*", destination_port = "80", access = "Allow", protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "*" },
+    "AllowHttpsInbound" = {
+      priority = "120", direction = "Inbound", source_port = "*", destination_port = "443", access = "Allow",
+      protocol = "Tcp", source_address_prefix = "Internet", destination_address_prefix = "*"
+    },
+    "AllowGatewayManagerInbound" = {
+      priority = "130", direction = "Inbound", source_port = "*", destination_port = "443", access = "Allow",
+      protocol = "Tcp", source_address_prefix = "GatewayManager", destination_address_prefix = "*"
+    },
+    "AllowAzureLoadBalancerInbound" = {
+      priority = "140", direction = "Inbound", source_port = "*", destination_port = "443", access = "Allow",
+      protocol = "Tcp", source_address_prefix = "AzureLoadBalancer", destination_address_prefix = "*"
+    },
+    "AllowBastionHostCommunication1" = {
+      priority = "150", direction = "Inbound", source_port = "*", destination_port = "5701", access = "Allow",
+      protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork"
+    },
+    "AllowBastionHostCommunication2" = {
+      priority = "155", direction = "Inbound", source_port = "*", destination_port = "80", access = "Allow",
+      protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork"
+    },
+    "AllowSSHRDPOutbound1" = {
+      priority = "160", direction = "Outbound", source_port = "*", destination_port = "22", access = "Allow",
+      protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "VirtualNetwork"
+    },
+    "AllowSSHRDPOutbound2" = {
+      priority = "165", direction = "Outbound", source_port = "*", destination_port = "3389", access = "Allow",
+      protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "VirtualNetwork"
+    },
+    "AllowAzureCloudOutbound2" = {
+      priority = "170", direction = "Outbound", source_port = "*", destination_port = "443", access = "Allow",
+      protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "AzureCloud"
+    },
+    "AllowAzureBastionCommunicationOutbound1" = {
+      priority = "180", direction = "Outbound", source_port = "*", destination_port = "5701", access = "Allow",
+      protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork"
+    },
+    "AllowAzureBastionCommunicationOutbound2" = {
+      priority = "185", direction = "Outbound", source_port = "*", destination_port = "8080", access = "Allow",
+      protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork"
+    },
+    "AllowGetSessionInformation" = {
+      priority = "190", direction = "Outbound", source_port = "*", destination_port = "80", access = "Allow",
+      protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "*"
+    },
   }
   description = "The Standard list of NSG rules needed to make a bastion work"
 }
@@ -176,5 +209,11 @@ variable "tags" {
 variable "tunneling_enabled" {
   type        = bool
   description = "Whether the tunneling feature is enable"
+  default     = null
+}
+
+variable "virtual_network_id" {
+  type        = string
+  description = "The ID of the virtual network that the bastion should be attached to when in Developer SKU"
   default     = null
 }

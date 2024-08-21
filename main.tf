@@ -78,6 +78,7 @@ resource "azurerm_bastion_host" "bastion_host" {
   scale_units            = var.bastion_sku == "Standard" ? var.scale_units : 2 # 2 is default for Basic sku
   shareable_link_enabled = var.bastion_sku == "Standard" ? var.shareable_link_enabled : null
   tunneling_enabled      = var.bastion_sku == "Standard" ? var.tunneling_enabled : null
+  virtual_network_id     = var.bastion_sku == "Developer" ? var.virtual_network_id : null
 
   dynamic "ip_configuration" {
     for_each = var.create_bastion_subnet || var.external_subnet_id != null ? [1] : []
