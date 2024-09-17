@@ -59,6 +59,7 @@ resource "azurerm_subnet_network_security_group_association" "bastion_nsg_associ
 }
 
 resource "azurerm_public_ip" "bastion_pip" {
+  count               = var.bastion_sku != "Developer" ? 1 : 0
   name                = var.bastion_pip_name != null ? var.bastion_pip_name : "pip-${var.bastion_host_name}"
   location            = var.bastion_pip_location != null ? var.bastion_pip_location : var.location
   resource_group_name = var.bastion_pip_rg_name != null ? var.bastion_pip_rg_name : var.rg_name
