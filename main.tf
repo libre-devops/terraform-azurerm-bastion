@@ -86,7 +86,7 @@ resource "azurerm_bastion_host" "bastion_host" {
     content {
       name                 = var.bastion_host_ipconfig_name != null ? var.bastion_host_ipconfig_name : "ipconfig-${var.bastion_host_name}"
       subnet_id            = var.create_bastion_subnet ? azurerm_subnet.bastion_subnet[0].id : var.external_subnet_id != null ? var.external_subnet_id : null
-      public_ip_address_id = var.bastion_sku != "Developer" ? azurerm_public_ip.bastion_pip.id : null
+      public_ip_address_id = var.bastion_sku != "Developer" ? azurerm_public_ip.bastion_pip[0].id : null
     }
   }
 
