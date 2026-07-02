@@ -1,94 +1,79 @@
 locals {
-  requires_external_subnet = var.create_bastion_subnet == false && var.external_subnet_id == null
+  rg      = provider::azurerm::parse_resource_id(var.resource_group_id)
+  rg_name = local.rg.resource_group_name
+
+  # Which per-SKU capabilities each host may use; preconditions assert against these so a mismatch
+  # fails the plan with a real message instead of an API error.
+  standard_plus = { for k, b in var.bastion_hosts : k => contains(["Standard", "Premium"], b.sku) }
 }
 
-resource "azurerm_subnet" "bastion_subnet" {
-  count                = var.create_bastion_subnet == true ? 1 : 0
-  name                 = try(var.bastion_subnet_name, "AzureBastionSubnet") # Must be AzureBastionSubnet
-  resource_group_name  = try(var.bastion_subnet_target_vnet_rg_name, null)
-  virtual_network_name = try(var.bastion_subnet_target_vnet_name, null)
-  address_prefixes     = [var.bastion_subnet_range]
+# Bastion hosts. Developer (the default) attaches straight to a virtual network: no
+# AzureBastionSubnet, no public IP, no scale units, free. The paid SKUs take an ip_configuration
+# whose public_ip_address_id comes from the public-ip module (this module never creates public IPs).
+resource "azurerm_bastion_host" "this" {
+  for_each = var.bastion_hosts
 
-  timeouts {
-    create = "5m"
-    delete = "10m"
-  }
-}
+  resource_group_name = local.rg_name
+  location            = var.location
+  tags                = merge(var.tags, coalesce(each.value.tags, {}))
+  name                = each.key
 
-resource "azurerm_network_security_group" "bastion_nsg" {
-  count               = var.create_bastion_nsg == true ? 1 : 0
-  name                = var.bastion_nsg_name != null ? var.bastion_nsg_name : "nsg-${var.bastion_host_name}"
-  location            = var.bastion_nsg_location != null ? var.bastion_nsg_location : var.location
-  resource_group_name = var.bastion_nsg_rg_name != null ? var.bastion_nsg_rg_name : var.rg_name
-  tags                = var.tags
+  sku                = each.value.sku
+  virtual_network_id = each.value.sku == "Developer" ? each.value.virtual_network_id : null
+  scale_units        = each.value.scale_units
+  zones              = each.value.zones
 
-  timeouts {
-    create = "5m"
-    delete = "10m"
-  }
-}
-
-// Fix error which causes security errors to be flagged by TFSec, public egress is needed for Azure Bastion to function, its kind of the point :)
-#tfsec:ignore:azure-network-no-public-egress[destination_address_prefix="*"]
-resource "azurerm_network_security_rule" "bastion_nsg" {
-  for_each = var.create_bastion_nsg_rules == true && var.create_bastion_nsg == true ? var.azure_bastion_nsg_list : {}
-
-  name                   = each.key
-  priority               = each.value.priority
-  direction              = each.value.direction
-  access                 = each.value.access
-  protocol               = each.value.protocol
-  source_port_range      = each.value.source_port
-  destination_port_range = each.value.destination_port
-  source_address_prefix  = each.value.source_address_prefix
-
-  #tfsec:ignore:azure-network-no-public-egress
-  destination_address_prefix = each.value.destination_address_prefix
-
-  resource_group_name         = azurerm_network_security_group.bastion_nsg[0].resource_group_name
-  network_security_group_name = azurerm_network_security_group.bastion_nsg[0].name
-}
-
-#Fix for https://github.com/terraform-providers/terraform-provider-azurerm/issues/5232
-resource "azurerm_subnet_network_security_group_association" "bastion_nsg_association" {
-  count      = var.create_bastion_subnet == true && var.create_bastion_nsg == true ? 1 : 0
-  depends_on = [azurerm_network_security_rule.bastion_nsg]
-
-  subnet_id                 = azurerm_subnet.bastion_subnet[0].id
-  network_security_group_id = azurerm_network_security_group.bastion_nsg[0].id
-}
-
-resource "azurerm_public_ip" "bastion_pip" {
-  count               = var.bastion_sku != "Developer" ? 1 : 0
-  name                = var.bastion_pip_name != null ? var.bastion_pip_name : "pip-${var.bastion_host_name}"
-  location            = var.bastion_pip_location != null ? var.bastion_pip_location : var.location
-  resource_group_name = var.bastion_pip_rg_name != null ? var.bastion_pip_rg_name : var.rg_name
-  allocation_method   = var.bastion_pip_allocation_method
-  sku                 = var.bastion_pip_sku
-  tags                = var.tags
-}
-
-resource "azurerm_bastion_host" "bastion_host" {
-  name                   = var.bastion_host_name
-  location               = var.location
-  resource_group_name    = var.rg_name
-  copy_paste_enabled     = var.copy_paste_enabled
-  sku                    = title(var.bastion_sku)
-  file_copy_enabled      = var.bastion_sku == "Standard" ? var.file_copy_enabled : null
-  ip_connect_enabled     = var.bastion_sku == "Standard" ? var.ip_connect_enabled : null
-  scale_units            = var.bastion_sku == "Standard" ? var.scale_units : 2 # 2 is default for Basic sku
-  shareable_link_enabled = var.bastion_sku == "Standard" ? var.shareable_link_enabled : null
-  tunneling_enabled      = var.bastion_sku == "Standard" ? var.tunneling_enabled : null
-  virtual_network_id     = var.bastion_sku == "Developer" ? var.virtual_network_id : null
+  copy_paste_enabled        = each.value.copy_paste_enabled
+  file_copy_enabled         = each.value.file_copy_enabled
+  ip_connect_enabled        = each.value.ip_connect_enabled
+  kerberos_enabled          = each.value.kerberos_enabled
+  shareable_link_enabled    = each.value.shareable_link_enabled
+  tunneling_enabled         = each.value.tunneling_enabled
+  session_recording_enabled = each.value.session_recording_enabled
 
   dynamic "ip_configuration" {
-    for_each = var.bastion_sku != "Developer" && var.create_bastion_subnet != null || var.external_subnet_id != null ? [1] : []
+    for_each = each.value.sku != "Developer" && each.value.ip_configuration != null ? [each.value.ip_configuration] : []
     content {
-      name                 = var.bastion_host_ipconfig_name != null ? var.bastion_host_ipconfig_name : "ipconfig-${var.bastion_host_name}"
-      subnet_id            = var.create_bastion_subnet ? azurerm_subnet.bastion_subnet[0].id : var.external_subnet_id != null ? var.external_subnet_id : null
-      public_ip_address_id = var.bastion_sku != "Developer" ? azurerm_public_ip.bastion_pip[0].id : null
+      name                 = ip_configuration.value.name
+      subnet_id            = ip_configuration.value.subnet_id
+      public_ip_address_id = ip_configuration.value.public_ip_address_id
     }
   }
 
-  tags = var.tags
+  lifecycle {
+    precondition {
+      condition     = each.value.sku != "Developer" || each.value.virtual_network_id != null
+      error_message = "Bastion \"${each.key}\": the Developer SKU attaches to a virtual network; set virtual_network_id."
+    }
+    precondition {
+      condition     = each.value.sku == "Developer" || each.value.ip_configuration != null
+      error_message = "Bastion \"${each.key}\": the ${each.value.sku} SKU needs ip_configuration (an AzureBastionSubnet of /26 or larger, plus a public_ip_address_id from the public-ip module${each.value.sku == "Premium" ? ", or omit the public IP for a private-only bastion" : ""})."
+    }
+    precondition {
+      condition     = contains(["Premium", "Developer"], each.value.sku) || try(each.value.ip_configuration.public_ip_address_id, null) != null
+      error_message = "Bastion \"${each.key}\": public_ip_address_id is required for the ${each.value.sku} SKU (only Premium supports private-only)."
+    }
+    precondition {
+      condition     = each.value.scale_units == null || local.standard_plus[each.key]
+      error_message = "Bastion \"${each.key}\": scale_units is only configurable on Standard or Premium."
+    }
+    precondition {
+      condition = local.standard_plus[each.key] || alltrue([
+        each.value.file_copy_enabled == null,
+        each.value.ip_connect_enabled == null,
+        each.value.kerberos_enabled == null,
+        each.value.shareable_link_enabled == null,
+        each.value.tunneling_enabled == null,
+      ])
+      error_message = "Bastion \"${each.key}\": file_copy, ip_connect, kerberos, shareable_link, and tunneling need the Standard or Premium SKU."
+    }
+    precondition {
+      condition     = each.value.session_recording_enabled == null || each.value.sku == "Premium"
+      error_message = "Bastion \"${each.key}\": session_recording_enabled needs the Premium SKU."
+    }
+    precondition {
+      condition     = each.value.zones == null || local.standard_plus[each.key]
+      error_message = "Bastion \"${each.key}\": zones are only supported on Standard or Premium."
+    }
+  }
 }

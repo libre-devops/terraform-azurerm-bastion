@@ -1,219 +1,74 @@
-variable "azure_bastion_nsg_list" {
-  default = {
-    "AllowHttpsInbound" = {
-      priority = "120", direction = "Inbound", source_port = "*", destination_port = "443", access = "Allow",
-      protocol = "Tcp", source_address_prefix = "Internet", destination_address_prefix = "*"
-    },
-    "AllowGatewayManagerInbound" = {
-      priority = "130", direction = "Inbound", source_port = "*", destination_port = "443", access = "Allow",
-      protocol = "Tcp", source_address_prefix = "GatewayManager", destination_address_prefix = "*"
-    },
-    "AllowAzureLoadBalancerInbound" = {
-      priority = "140", direction = "Inbound", source_port = "*", destination_port = "443", access = "Allow",
-      protocol = "Tcp", source_address_prefix = "AzureLoadBalancer", destination_address_prefix = "*"
-    },
-    "AllowBastionHostCommunication1" = {
-      priority = "150", direction = "Inbound", source_port = "*", destination_port = "5701", access = "Allow",
-      protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork"
-    },
-    "AllowBastionHostCommunication2" = {
-      priority = "155", direction = "Inbound", source_port = "*", destination_port = "80", access = "Allow",
-      protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork"
-    },
-    "AllowSSHRDPOutbound1" = {
-      priority = "160", direction = "Outbound", source_port = "*", destination_port = "22", access = "Allow",
-      protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "VirtualNetwork"
-    },
-    "AllowSSHRDPOutbound2" = {
-      priority = "165", direction = "Outbound", source_port = "*", destination_port = "3389", access = "Allow",
-      protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "VirtualNetwork"
-    },
-    "AllowAzureCloudOutbound2" = {
-      priority = "170", direction = "Outbound", source_port = "*", destination_port = "443", access = "Allow",
-      protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "AzureCloud"
-    },
-    "AllowAzureBastionCommunicationOutbound1" = {
-      priority = "180", direction = "Outbound", source_port = "*", destination_port = "5701", access = "Allow",
-      protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork"
-    },
-    "AllowAzureBastionCommunicationOutbound2" = {
-      priority = "185", direction = "Outbound", source_port = "*", destination_port = "8080", access = "Allow",
-      protocol = "Tcp", source_address_prefix = "VirtualNetwork", destination_address_prefix = "VirtualNetwork"
-    },
-    "AllowGetSessionInformation" = {
-      priority = "190", direction = "Outbound", source_port = "*", destination_port = "80", access = "Allow",
-      protocol = "Tcp", source_address_prefix = "*", destination_address_prefix = "*"
-    },
+variable "resource_group_id" {
+  description = "Resource id of the resource group to create the bastion hosts in. The name is parsed from it (pass the rg module's ids output)."
+  type        = string
+
+  validation {
+    condition     = try(provider::azurerm::parse_resource_id(var.resource_group_id).resource_type, "") == "resourceGroups"
+    error_message = "resource_group_id must be a resource group id of the form /subscriptions/<sub>/resourceGroups/<name>."
   }
-  description = "The Standard list of NSG rules needed to make a bastion work"
-}
-
-variable "bastion_host_ipconfig_name" {
-  type        = string
-  description = "The IP Configuration name for the Azure Bastion"
-  default     = null
-}
-
-variable "bastion_host_name" {
-  type        = string
-  description = "The name for the Bastion host in the portal"
-}
-
-variable "bastion_nsg_location" {
-  type        = string
-  description = "The location of the bastion nsg"
-  default     = null
-}
-
-variable "bastion_nsg_name" {
-  type        = string
-  description = "The name for the NSG to be created with the AzureBastionSubnet"
-  default     = null
-}
-
-variable "bastion_nsg_rg_name" {
-  type        = string
-  description = "The resource group name which the NSG should be placed in"
-  default     = null
-}
-
-variable "bastion_pip_allocation_method" {
-  type        = string
-  default     = "Static"
-  description = "The allocation method for the Public IP, default is Static"
-}
-
-variable "bastion_pip_location" {
-  type        = string
-  description = "The location for the Bastion Public IP, default is UK South"
-  default     = null
-}
-
-variable "bastion_pip_name" {
-  type        = string
-  description = "The name for the Bastion Public IP"
-  default     = null
-}
-
-variable "bastion_pip_rg_name" {
-  type        = string
-  description = "The resource group name for Bastion Public IP"
-  default     = null
-}
-
-variable "bastion_pip_sku" {
-  type        = string
-  default     = "Standard"
-  description = "The SKU for the Bastion Public IP, default is Standard"
-}
-
-variable "bastion_sku" {
-  type        = string
-  description = "The SKU of the bastion, default is Basic"
-  default     = "Basic"
-}
-
-variable "bastion_subnet_name" {
-  default     = "AzureBastionSubnet"
-  type        = string
-  description = "The name of the Azure Bastion Subnet - note, this is a static value and should not be changed"
-}
-
-variable "bastion_subnet_range" {
-  type        = string
-  description = "The IP Range for the Bastion Subnet - Note, Minimum is a /27"
-  default     = null
-}
-
-variable "bastion_subnet_target_vnet_name" {
-  type        = string
-  description = "The name of the VNet the bastion is intended to join"
-  default     = null
-}
-
-variable "bastion_subnet_target_vnet_rg_name" {
-  type        = string
-  description = "The name of the resource group that the VNet can be found in"
-  default     = null
-}
-
-variable "copy_paste_enabled" {
-  type        = bool
-  description = "Whether copy paste is enabled, defaults to true"
-  default     = true
-}
-
-variable "create_bastion_nsg" {
-  type        = bool
-  description = "Whether a NSG should be created for the Bastion, defaults to true"
-  default     = true
-}
-
-variable "create_bastion_nsg_rules" {
-  type        = bool
-  description = "Whether the NSG rules for a bastion should be made, default is true"
-  default     = true
-}
-
-variable "create_bastion_subnet" {
-  type        = bool
-  description = "Whether this module should create the bastion subnet for the user, defaults to true"
-  default     = true
-}
-
-variable "external_subnet_id" {
-  description = "The ID of the external subnet if not created by this module."
-  type        = string
-  default     = null
-}
-
-variable "file_copy_enabled" {
-  type        = bool
-  description = "Whether file copy is enabled"
-  default     = null
-}
-
-variable "ip_connect_enabled" {
-  type        = bool
-  description = "Whether the IP connect feature is enabled"
-  default     = null
 }
 
 variable "location" {
+  description = "Azure region for the bastion hosts."
   type        = string
-  description = "The location for the bastion host, default is UK South"
-}
-
-variable "rg_name" {
-  type        = string
-  description = "The resource group name for the Bastion resource"
-}
-
-variable "scale_units" {
-  type        = number
-  description = "The number of scale units, default is 2"
-  default     = 2
-}
-
-variable "shareable_link_enabled" {
-  type        = bool
-  description = "Whether the shareable link is enabled"
-  default     = null
 }
 
 variable "tags" {
-  description = "The default tags to be assigned"
+  description = "Tags applied to every bastion host (merged with any per-host tags)."
   type        = map(string)
+  default     = {}
 }
 
-variable "tunneling_enabled" {
-  type        = bool
-  description = "Whether the tunneling feature is enable"
-  default     = null
-}
+variable "bastion_hosts" {
+  description = <<DESC
+The bastion hosts to create, keyed by name. The default SKU is DEVELOPER: the lightweight (free)
+shared-pool offering that just attaches to a virtual network (set virtual_network_id), needs no
+AzureBastionSubnet, no public IP, and no scale units, so getting going is one attribute. Scale up per
+host by setting sku:
 
-variable "virtual_network_id" {
-  type        = string
-  description = "The ID of the virtual network that the bastion should be attached to when in Developer SKU"
-  default     = null
+- Basic: needs ip_configuration { subnet_id (an AzureBastionSubnet, /26 or larger), and a
+  public_ip_address_id from the public-ip module (this module never creates public IPs) }.
+- Standard: Basic plus scale_units (2-50) and the optional features file_copy_enabled,
+  ip_connect_enabled, kerberos_enabled, shareable_link_enabled, tunneling_enabled.
+- Premium: Standard plus session_recording_enabled, and public_ip_address_id may be omitted for a
+  private-only bastion.
+
+copy_paste_enabled works on every SKU (default true). zones is supported on Standard and Premium.
+Feature/SKU mismatches fail the plan with a specific message rather than at the API.
+DESC
+
+  type = map(object({
+    sku                = optional(string, "Developer")
+    virtual_network_id = optional(string)
+
+    ip_configuration = optional(object({
+      name                 = optional(string, "bastion-ipconfig")
+      subnet_id            = string
+      public_ip_address_id = optional(string)
+    }))
+
+    scale_units = optional(number)
+    zones       = optional(list(string))
+
+    copy_paste_enabled        = optional(bool, true)
+    file_copy_enabled         = optional(bool)
+    ip_connect_enabled        = optional(bool)
+    kerberos_enabled          = optional(bool)
+    shareable_link_enabled    = optional(bool)
+    tunneling_enabled         = optional(bool)
+    session_recording_enabled = optional(bool)
+
+    tags = optional(map(string))
+  }))
+  default = {}
+
+  validation {
+    condition     = alltrue([for b in values(var.bastion_hosts) : contains(["Developer", "Basic", "Standard", "Premium"], b.sku)])
+    error_message = "sku must be Developer, Basic, Standard, or Premium."
+  }
+
+  validation {
+    condition     = alltrue([for b in values(var.bastion_hosts) : b.scale_units == null || (coalesce(b.scale_units, 2) >= 2 && coalesce(b.scale_units, 2) <= 50)])
+    error_message = "scale_units, when set, must be between 2 and 50."
+  }
 }

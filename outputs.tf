@@ -1,34 +1,34 @@
-output "bastion_dns_name" {
-  value       = azurerm_bastion_host.bastion_host.dns_name
-  description = "The DNS name of the Azure Bastion"
+output "bastion_hosts" {
+  description = "The bastion hosts, keyed by name. Full resource objects (all attributes)."
+  value       = azurerm_bastion_host.this
 }
 
-output "bastion_hostname" {
-  value       = azurerm_bastion_host.bastion_host.name
-  description = "The host name of the bastion"
+output "ids" {
+  description = "Map of bastion name to resource id."
+  value       = { for k, b in azurerm_bastion_host.this : k => b.id }
 }
 
-output "bastion_ip_configuration" {
-  value       = var.bastion_sku != "Developer" ? azurerm_bastion_host.bastion_host.ip_configuration[0] : null
-  description = "The bastion host ip_configuration block"
+output "ids_zipmap" {
+  description = "Map of bastion name to { name, id }, for easy composition with other modules."
+  value       = { for k, b in azurerm_bastion_host.this : k => { name = b.name, id = b.id } }
 }
 
-output "bastion_nsg_id" {
-  value       = var.create_bastion_nsg == true ? azurerm_network_security_group.bastion_nsg[0].id : null
-  description = "The host name of the bastion"
+output "names" {
+  description = "Map of bastion name to name (convenience passthrough)."
+  value       = { for k, b in azurerm_bastion_host.this : k => b.name }
 }
 
-output "bastion_nsg_name" {
-  value       = var.create_bastion_nsg == true ? azurerm_network_security_group.bastion_nsg[0].name : null
-  description = "The name of the bastion nsg"
+output "dns_names" {
+  description = "Map of bastion name to the bastion DNS name."
+  value       = { for k, b in azurerm_bastion_host.this : k => b.dns_name }
 }
 
-output "bastion_subnet_id" {
-  value       = var.bastion_sku != "Developer" ? azurerm_bastion_host.bastion_host.ip_configuration[0].subnet_id : null
-  description = "The subnet ID associated with the bastion host's IP configuration"
+output "private_only" {
+  description = "Map of bastion name to whether the host is private-only (Premium without a public IP)."
+  value       = { for k, b in azurerm_bastion_host.this : k => b.private_only_enabled }
 }
 
-output "bastion_subnet_ip_range" {
-  value       = var.create_bastion_subnet == true ? azurerm_subnet.bastion_subnet[0].address_prefixes : null
-  description = "Bastion subnet IP range"
+output "resource_group_name" {
+  description = "The resource group the bastion hosts live in, parsed from resource_group_id."
+  value       = local.rg_name
 }
