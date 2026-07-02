@@ -68,7 +68,8 @@ module "public_ip" {
   tags              = module.tags.tags
 
   public_ips = {
-    (local.pip_name) = {}
+    # A zonal bastion requires a zone-matching public IP.
+    (local.pip_name) = { zones = ["1", "2", "3"] }
   }
 }
 
